@@ -1,29 +1,44 @@
-import express from 'express'
-import ProductController from './src/controllers/product.controller.js'
+import express from 'express';
+import ProductsController from './src/controllers/product.controller.js';
+import ejsLayouts from 'express-ejs-layouts';
 import path from 'path';
-import ejslayouts from 'express-ejs-layouts'
-import validatorRequest from './middleware/validation.middleware.js';
+import validationMiddleware from './src/middlewares/validation.middleware.js';
+import { uploadFile } from './src/middlewares/file-upload.middleware.js';
 
-const server = express();
-// parse form data
-server.use(express.urlencoded({extended:true}))
+const app = express();
+app.use(express.static('public'));
 
+const productsController =
+  new ProductsController();
 
+app.use(ejsLayouts);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.set(
+  'views',
+  path.join(path.resolve(), 'src', 'views')
+);
 
-// Setup view engine settings
-server.set('view engine','ejs');
-server.set('views',path.join(path.resolve(),'src','views')) //We need to mention the path that ejs is being used. And we need to import the 'path' to this server file. 
+app.get('/', productsController.getProducts);
+app.get(
+  '/add-product',uploadFile.single('imageUrl'),
+  productsController.getAddProduct
+);
+app.get(
+  '/update-product/:id',
+  productsController.getUpdateProductView
+);
 
-server.use(ejslayouts);
+app.post('/delete-product/:id',productsController.deleteProduct)
 
+app.post(
+  '/',uploadFile.single('imageUrl'),
+  validationMiddleware,
+  productsController.postAddProduct
+);
+app.post('/update-product',productsController.postUpdateProduct)
 
-
-const productController = new ProductController();
-server.get('/',productController.getProducts)
-server.get('/new',productController.getAddForm)
-server.post('/',validatorRequest,productController.addNewProduct)
-server.use(express.static('src/views'));
-
-server.listen(3400,()=>{
-    console.log('Server is listening on 3400');
-})
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});

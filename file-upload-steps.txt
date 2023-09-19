@@ -1,0 +1,11 @@
+1. Install Multer. - Done - $ npm install --save multer
+
+2. Changes in view. - add enctype="multipart/form-data" to the HTML form
+
+3. Middleware to handle files. - Created a middleware file and updated the Multer code  - file: file-upload.middleware.js
+
+    3.a: Refer the documentation - https://www.npmjs.com/package/multer?activeTab=readme
+
+4. Apply that middleware. In the index.js file add the middleware (multer) for the /add-product
+
+5. Update Controller to update urls of images.
